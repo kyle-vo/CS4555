@@ -52,15 +52,22 @@ public class SpawnToys : MonoBehaviour {
 
         if (Physics.Raycast(player.transform.position, player.transform.forward, out hit, placeDownRange)){
             if (hit.collider.CompareTag("Table")) {
-                if (toyOnTable != null && toyOnTable.transform.IsChildOf(hit.collider.transform)) {
-                    // Replace the unfinished toy with the finished toy
-                    Vector3 position = toyOnTable.transform.position;
-                    Destroy(toyOnTable);
-                    toyOnTable = Instantiate(finishedToyPrefab, position, Quaternion.identity);
-                    // Set the position of the spawned toy to the center of the table
-                    Vector3 tablePosition = hit.collider.bounds.center;
-                    toyOnTable.transform.position = tablePosition + new Vector3(0, 0.35f, 0); // Slightly above the table
-                    toyOnTable.transform.SetParent(hit.collider.transform); // Parent to the table
+                // Iterate over the children of the table to find the toy
+                GameObject toyOnThisTable = null;
+                foreach (Transform child in hit.collider.transform) {
+                    if (child.CompareTag("Toy")) {
+                        toyOnThisTable = child.gameObject;
+                        break;
+                    }
+                }
+
+                // If there's a toy on this table, replace it with the finished toy
+                if (toyOnThisTable != null) {
+                    Vector3 position = toyOnThisTable.transform.position;
+                    Destroy(toyOnThisTable); // Destroy the unfinished toy
+                    GameObject finishedToy = Instantiate(finishedToyPrefab, position, Quaternion.identity);
+                    finishedToy.transform.position = position + new Vector3(0, 0, 0); // Slightly above the table
+                    finishedToy.transform.SetParent(hit.collider.transform); // Parent to the table
                 }
             }
         }
@@ -167,5 +174,3 @@ public class SpawnToys : MonoBehaviour {
         }
     }
 }
-
-
